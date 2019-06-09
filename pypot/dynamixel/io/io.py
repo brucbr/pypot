@@ -23,17 +23,17 @@ class DxlIO(AbstractDxlIO):
         limits = self.get_angle_limit(to_get_ids, convert=False)
         modes = ['wheel' if limit == (0, 0) else 'joint' for limit in limits]
 
-        self._known_mode.update(zip(to_get_ids, modes))
+        self._known_mode.update(list(zip(to_get_ids, modes)))
 
         return tuple(self._known_mode[id] for id in ids)
 
     def set_wheel_mode(self, ids):
         """ Sets the specified motors to wheel mode. """
-        self.set_control_mode(dict(zip(ids, itertools.repeat('wheel'))))
+        self.set_control_mode(dict(list(zip(ids, itertools.repeat('wheel')))))
 
     def set_joint_mode(self, ids):
         """ Sets the specified motors to joint mode. """
-        self.set_control_mode(dict(zip(ids, itertools.repeat('joint'))))
+        self.set_control_mode(dict(list(zip(ids, itertools.repeat('joint')))))
 
     def set_control_mode(self, mode_for_id):
         models = []
@@ -47,19 +47,19 @@ class DxlIO(AbstractDxlIO):
 
         pos_max = [conv.position_range[m][0] for m in models]
         limits = ((0, 0) if mode == 'wheel' else (0, pos_max[i] - 1)
-                  for i, mode in enumerate(mode_for_id.itervalues()))
+                  for i, mode in enumerate(mode_for_id.values()))
 
-        self._set_angle_limit(dict(zip(mode_for_id.keys(), limits)), convert=False)
-        self._known_mode.update(mode_for_id.items())
+        self._set_angle_limit(dict(list(zip(list(mode_for_id.keys()), limits))), convert=False)
+        self._known_mode.update(list(mode_for_id.items()))
 
     def set_angle_limit(self, limit_for_id, **kwargs):
         """ Sets the angle limit to the specified motors. """
         convert = kwargs['convert'] if 'convert' in kwargs else self._convert
 
-        if 'wheel' in self.get_control_mode(limit_for_id.keys()):
+        if 'wheel' in self.get_control_mode(list(limit_for_id.keys())):
             raise ValueError('can not change the angle limit of a motor in wheel mode')
 
-        if (0, 0) in limit_for_id.values():
+        if (0, 0) in list(limit_for_id.values()):
             raise ValueError('can not set limit to (0, 0)')
 
         self._set_angle_limit(limit_for_id, convert=convert)
@@ -179,11 +179,11 @@ _add_control('pid gain',
 
 _add_control('compliance margin',
              address=0x1A, length=1, nb_elem=2,
-             models=('AX-12', 'AX-18', 'RX-24', 'RX-28', 'RX-64'))
+             models=('AX-12', 'AX-12W','AX-18', 'RX-24', 'RX-28', 'RX-64'))
 
 _add_control('compliance slope',
              address=0x1C, length=1, nb_elem=2,
-             models=('AX-12', 'AX-18', 'RX-24', 'RX-28', 'RX-64'))
+             models=('AX-12', 'AX-12W', 'AX-18', 'RX-24', 'RX-28', 'RX-64'))
 
 _add_control('goal position',
              address=0x1E,
