@@ -31,6 +31,7 @@ torque_max = {  # in N.m
     'MX-28': 2.5,
     'MX-12': 1.2,
     'AX-12': 1.2,
+    'AX-12W': 1.2,
     'AX-18': 1.8,
     'RX-24': 2.6,
     'RX-28': 2.5,
@@ -45,6 +46,7 @@ velocity = {  # in degree/s
     'MX-28': 330.,
     'MX-12': 2820.,
     'AX-12': 354.,
+    'AX-12W': 354.,
     'AX-18': 582.,
     'RX-24': 756.,
     'RX-28': 402.,
@@ -152,6 +154,7 @@ def pid_to_dxl(value, model):
 
 dynamixelModels = {
     12: 'AX-12',    # 12 + (0<<8)
+    300: 'AX-12W', # Random value :P
     18: 'AX-18',    # 18 + (0<<8)
     24: 'RX-24',    # 24 + (0<<8)
     28: 'RX-28',    # 28 + (0<<8)
@@ -217,10 +220,10 @@ def dxl_to_baudrate(value, model):
 
 def baudrate_to_dxl(value, model):
     current_baudrates = dynamixelBaudratesWithModel.get(model, dynamixelBaudrates)
-    for k, v in current_baudrates.iteritems():
+    for k, v in current_baudrates.items():
         if (abs(v - value) / float(value)) < 0.05:
             return k
-    raise ValueError('incorrect baudrate {} (possible values {})'.format(value, current_baudrates.values()))
+    raise ValueError('incorrect baudrate {} (possible values {})'.format(value, list(current_baudrates.values())))
 
 # MARK: - Return Delay Time
 
@@ -335,7 +338,7 @@ def dxl_to_control_mode(value, _):
 
 
 def control_mode_to_dxl(mode, _):
-    return (next((v for v, m in control_modes.items()
+    return (next((v for v, m in list(control_modes.items())
                   if m == mode), None))
 
 # MARK: - Various utility functions
@@ -362,7 +365,7 @@ def dxl_decode(data):
 
 def dxl_decode_all(data, nb_elem):
     if nb_elem > 1:
-        data = list(itertools.izip(*([iter(data)] * (len(data) // nb_elem))))
+        data = list(zip(*([iter(data)] * (len(data) // nb_elem))))
         return tuple(map(dxl_decode, data))
     else:
         return dxl_decode(data)
